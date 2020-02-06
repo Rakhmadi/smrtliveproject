@@ -1,4 +1,4 @@
-#include <Arduino.h>
+
 #include <ESP8266WiFi.h>
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
@@ -17,11 +17,6 @@
 #define SYS_DHT_TYPE DHT11
 //////////////////////////////////
 DHT dht;
-struct Led {
-    byte id;
-    byte gpio;
-    byte status;
-} led_resource;
 
 WiFiServer server(80);
 byte led = 16;
@@ -37,17 +32,23 @@ void get_l(){
        StaticJsonBuffer<200> jsonBuffer;
     JsonObject& jsonObj = jsonBuffer.createObject();
     char JSONmessageBuffer[200];
-     jsonObj["id"] = 1;
-        jsonObj["temperatur"] =tmp;
-        jsonObj["kelembapan"] =hmdt;
-          jsonObj["signalstr"] = rsii;
-        jsonObj["status"] = 200;
-        jsonObj.prettyPrintTo(JSONmessageBuffer, sizeof(JSONmessageBuffer));
+       jsonObj["id"] = 1;
+       jsonObj["temperatur"] =tmp;
+       jsonObj["kelembapan"] =hmdt;
+       jsonObj["signalstr"] = rsii;
+       jsonObj["status"] = 200;
+       jsonObj.prettyPrintTo(JSONmessageBuffer, sizeof(JSONmessageBuffer));
        http_rest_server.sendHeader("Access-Control-Allow-Origin: *");
-         http_rest_server.sendHeader("Access-Control-Allow-Methods: *");
+       http_rest_server.sendHeader("Access-Control-Allow-Methods: *");
        http_rest_server.send(200, "application/json",JSONmessageBuffer );
     }
 }
+//////////////  ROUTING  ///////////////////
+void  sys_route_http(){
+       http_rest_server.on("/leds", HTTP_GET, get_l);
+}
+////////////////////////////////////////////
+
 void setup() {
   WiFiManager wifimanager;
   wifimanager.autoConnect("IoT_CoNfT_","nulllablestc");
@@ -60,7 +61,7 @@ void setup() {
     }else{
 
     }
-  http_rest_server.on("/leds", HTTP_GET, get_l);
+  sys_route_http();
   http_rest_server.begin();
   dht.setup(SYS_DHT_OUT_PIN);
   server.begin();
