@@ -38,14 +38,34 @@ void get_l(){
        jsonObj["signalstr"] = rsii;
        jsonObj["status"] = 200;
        jsonObj.prettyPrintTo(JSONmessageBuffer, sizeof(JSONmessageBuffer));
-       http_rest_server.sendHeader("Access-Control-Allow-Origin: *");
-       http_rest_server.sendHeader("Access-Control-Allow-Methods: *");
+       http_rest_server.sendHeader("Access-Control-Allow-Methods", "*");
+       http_rest_server.sendHeader("Access-Control-Allow-Headers", "*");
        http_rest_server.send(200, "application/json",JSONmessageBuffer );
     }
 }
+void relay(){
+      String condition =http_rest_server.arg("condition");
+     if (condition == "on") {
+       digitalWrite(led,0x000000000000);
+     } else if (condition == "off") {
+        digitalWrite(led,0x000000000001);
+     } else {
+      char err[] = "{[\"msg\":\"err_params\"]}"; 
+      http_rest_server.send(400, "application/json",err );
+     }
+    StaticJsonBuffer<200> jsonBuffer;
+    JsonObject& jsonObj = jsonBuffer.createObject();
+    char msbubb[200];
+       jsonObj["condition"] = condition;
+       jsonObj.prettyPrintTo(msbubb, sizeof(msbubb));
+       http_rest_server.sendHeader("Access-Control-Allow-Methods", "*");
+       http_rest_server.sendHeader("Access-Control-Allow-Headers", "*");
+       http_rest_server.send(200, "application/json",msbubb );
+}
 //////////////  ROUTING  ///////////////////
 void  sys_route_http(){
-       http_rest_server.on("/leds", HTTP_GET, get_l);
+       http_rest_server.on("/dht", HTTP_GET, get_l);
+       http_rest_server.on("/relay",relay);
 }
 ////////////////////////////////////////////
 
@@ -68,12 +88,4 @@ void setup() {
 }
 void loop() {
   http_rest_server.handleClient();
-  int n=digitalRead(ds);
-  if(n == 0x0){
-    digitalWrite(led,0x000000000001);
-    Serial.print("sdfdg");
-  }else
-  {
-      digitalWrite(led,0x000000000000);
-  }
 }
