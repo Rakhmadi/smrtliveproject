@@ -51,8 +51,15 @@ void relay(){
      } else if (condition == "off") {
         digitalWrite(led,0x000000000001);
      } else {
-      char err[] = "{[\"msg\":\"err_params\"]}"; 
-      http_rest_server.send(400, "application/json",err );
+       StaticJsonBuffer<200> jsonBuffer;
+    JsonObject& jsonObj = jsonBuffer.createObject();
+    char dd[200];
+       jsonObj["msg"] = "value_error_msf_false";
+       jsonObj.prettyPrintTo(dd, sizeof(daddr_t));
+       http_rest_server.sendHeader("Access-Control-Allow-Methods", "*");
+       http_rest_server.sendHeader("Access-Control-Allow-Origin", "*");
+       http_rest_server.sendHeader("Access-Control-Allow-Headers", "*");
+      http_rest_server.send(400, "application/json",dd );
      }
     StaticJsonBuffer<200> jsonBuffer;
     JsonObject& jsonObj = jsonBuffer.createObject();
@@ -93,7 +100,7 @@ void loop() {
 }
 ///////////////////////////////////////////////
 ///////////////////////////////////////////////
-/////////// BY RAKHMADI & Choirul//////////////
+// BY RAKHMADI FULLSTACKDEV & Choirul//////////
 ///////////////////////////////////////////////
 ///////////////////////////////////////////////
 
