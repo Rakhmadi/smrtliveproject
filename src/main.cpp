@@ -39,6 +39,7 @@ void get_l(){
        jsonObj["status"] = 200;
        jsonObj.prettyPrintTo(JSONmessageBuffer, sizeof(JSONmessageBuffer));
        http_rest_server.sendHeader("Access-Control-Allow-Methods", "*");
+       http_rest_server.sendHeader("Access-Control-Allow-Origin", "*");
        http_rest_server.sendHeader("Access-Control-Allow-Headers", "*");
        http_rest_server.send(200, "application/json",JSONmessageBuffer );
     }
@@ -59,6 +60,7 @@ void relay(){
        jsonObj["condition"] = condition;
        jsonObj.prettyPrintTo(msbubb, sizeof(msbubb));
        http_rest_server.sendHeader("Access-Control-Allow-Methods", "*");
+       http_rest_server.sendHeader("Access-Control-Allow-Origin", "*");
        http_rest_server.sendHeader("Access-Control-Allow-Headers", "*");
        http_rest_server.send(200, "application/json",msbubb );
 }
@@ -89,3 +91,9 @@ void setup() {
 void loop() {
   http_rest_server.handleClient();
 }
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+/////////// BY RAKHMADI & Choirul//////////////
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+
