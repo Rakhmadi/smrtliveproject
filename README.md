@@ -33,4 +33,5 @@ use Extension PlatformIo in visual studio code
  /                    >> get status wifi and relay condition 1 = false 0=true
  /relay?condition=    >> activate relay value on/off 
 ```
-### By Rakhmadi
+### By Rakhmadi 
+## master in https://github.com/Rakhmadi/smrtliveproject
