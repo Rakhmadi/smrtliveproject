@@ -8,8 +8,6 @@
 #include <DHT.h> 
 #include <Adafruit_Sensor.h>
 #include <stdio.h>
-#include <Blynk.h>
-#include <BlynkSimpleEsp8266.h>
 /////////////DEFINE///////////////
 #define DRD_TIMEOUT 2.0
 #define DRD_ADDRESS 0x00
@@ -19,24 +17,12 @@
 //////////////////////////////////
 DHT dht;
 WiFiServer server(80);
-byte led = 16;
-byte ds = 2;
+byte led  = 16;
+byte led1 = 14;
+byte led2 = 12;
+byte led3 = 13;
+byte ds   =  2;
 ESP8266WebServer http_rest_server(PORT_REST_HTTP);
-float t;
-float h;
-BlynkTimer timer;
-//////// dht blynk function
-void sendSensor()
-{
-  h = dht.getHumidity();
-  t = dht.getTemperature(); 
-  if (isnan(h) || isnan(t)) {
-    Serial.println("Failed to read from DHT sensor!");
-    return;
-  }
-  Blynk.virtualWrite(V5, h);
-  Blynk.virtualWrite(V6, t);
-}
 //FUNCTION DHT11
 void get_l(){
     if (false)
@@ -46,7 +32,6 @@ void get_l(){
        //MENGAMBIL TEMPERATUR& HUMIDTY
        float tmp =dht.getTemperature();
        float hmdt=dht.getHumidity();
-       
        StaticJsonBuffer<200> jsonBuffer;
        JsonObject& jsonObj = jsonBuffer.createObject();
        char JSONmessageBuffer[200];
@@ -87,13 +72,76 @@ void qwer(){
        String q =WiFi.SSID();
        String w =WiFi.psk();
        char rt=digitalRead(led);
+       char rt1=digitalRead(led1);
+       char rt2=digitalRead(led2);
+       char rt3=digitalRead(led3);
        StaticJsonBuffer<200> jsonBuffer;
        JsonObject& jsonObj = jsonBuffer.createObject();
        char msbubb[200];
        jsonObj["status"] = WiFi.status();
-       jsonObj["rely"] =rt;
+       jsonObj["relay1"] =rt;
+       jsonObj["relay2"] =rt1;
+       jsonObj["relay3"] =rt2;
+       jsonObj["relay4"] =rt3;
        jsonObj["ssid"] =q;
        jsonObj["pass"] =w;
+       jsonObj.prettyPrintTo(msbubb, sizeof(msbubb));
+       http_rest_server.sendHeader("Access-Control-Allow-Methods", "*");
+       http_rest_server.sendHeader("Access-Control-Allow-Origin", "*");
+       http_rest_server.sendHeader("Access-Control-Allow-Headers", "*");
+       http_rest_server.send(200, "application/json",msbubb );
+}
+void rely1(){
+        String condition =http_rest_server.arg("condition");
+     if (condition == "on") {
+       digitalWrite(led1,0x000000000000);
+     } else if (condition == "off") {
+        digitalWrite(led1,0x000000000001);
+     } else {
+          
+     }
+       StaticJsonBuffer<200> jsonBuffer;
+       JsonObject& jsonObj = jsonBuffer.createObject();
+       char msbubb[200];
+       jsonObj["condition"] = condition;
+       jsonObj.prettyPrintTo(msbubb, sizeof(msbubb));
+       http_rest_server.sendHeader("Access-Control-Allow-Methods", "*");
+       http_rest_server.sendHeader("Access-Control-Allow-Origin", "*");
+       http_rest_server.sendHeader("Access-Control-Allow-Headers", "*");
+       http_rest_server.send(200, "application/json",msbubb );
+}
+void rely2(){
+        String condition =http_rest_server.arg("condition");
+     if (condition == "on") {
+       digitalWrite(led2,0x000000000000);
+     } else if (condition == "off") {
+        digitalWrite(led2,0x000000000001);
+     } else {
+          
+     }
+       StaticJsonBuffer<200> jsonBuffer;
+       JsonObject& jsonObj = jsonBuffer.createObject();
+       char msbubb[200];
+       jsonObj["condition"] = condition;
+       jsonObj.prettyPrintTo(msbubb, sizeof(msbubb));
+       http_rest_server.sendHeader("Access-Control-Allow-Methods", "*");
+       http_rest_server.sendHeader("Access-Control-Allow-Origin", "*");
+       http_rest_server.sendHeader("Access-Control-Allow-Headers", "*");
+       http_rest_server.send(200, "application/json",msbubb );
+}
+void rely3(){
+        String condition =http_rest_server.arg("condition");
+     if (condition == "on") {
+       digitalWrite(led3,0x000000000000);
+     } else if (condition == "off") {
+        digitalWrite(led3,0x000000000001);
+     } else {
+          
+     }
+       StaticJsonBuffer<200> jsonBuffer;
+       JsonObject& jsonObj = jsonBuffer.createObject();
+       char msbubb[200];
+       jsonObj["condition"] = condition;
        jsonObj.prettyPrintTo(msbubb, sizeof(msbubb));
        http_rest_server.sendHeader("Access-Control-Allow-Methods", "*");
        http_rest_server.sendHeader("Access-Control-Allow-Origin", "*");
@@ -104,17 +152,21 @@ void qwer(){
 void  sys_route_http(){
        http_rest_server.on("/dht", HTTP_GET, get_l);
        http_rest_server.on("/relay",relay);
+       http_rest_server.on("/relay1",rely1);
+       http_rest_server.on("/relay2",rely2);
+       http_rest_server.on("/relay3",rely3);
        http_rest_server.on("/",qwer);
 }
-      ////////////////////////////////////////////
+     ////////////////////////////////////////////
 void setup() {
        ////////////////////Setup Wifimanager
        WiFiManager wifimanager;
-       /////// blynk token
-       char auth[] ="Your Auth. Key";
-       ////
+ 
        wifimanager.autoConnect("IoT_Dinamika","qwerty123");
-       pinMode(led, OUTPUT); //relay mode output
+       pinMode(led, OUTPUT);
+       pinMode(led1, OUTPUT);
+       pinMode(led2, OUTPUT);
+       pinMode(led3, OUTPUT); //relay mode output
        ///// Button reset setup
        DoubleResetDetect drd(DRD_TIMEOUT, DRD_ADDRESS);
    if (drd.detect()) 
@@ -132,27 +184,20 @@ void setup() {
   dht.setup(SYS_DHT_OUT_PIN);
   //SERVER BEGIN
   server.begin();
-  //blynk setup
-   char ssid[50];
-   char pass[50];
-   String a= WiFi.SSID();
-    a.toCharArray(ssid, 50);
-   String b=WiFi.psk();
-    b.toCharArray(pass, 50);
-   Blynk.begin(auth, ssid, pass);
-  /////blynk interval
-  timer.setInterval(1000L, sendSensor);
-  ///////
+
 }
 void loop() {
   //handeled web server client
   http_rest_server.handleClient();
-  delay(3000);
-   Blynk.run();
-  timer.run();
 }
 ///////////////////////////////////////////////
 ///////////////////////////////////////////////
 // BY RAKHMADI FULLSTACKDEV & Choirul//////////
 ///////////////////////////////////////////////
+///////////////////////////////////////////////
+// INPUT   BOARD_LABEL  RAW_PIN_NUM          //
+// IN1     D0           16                   //
+// IN2     D5           14                   //
+// IN3     D6           12                   //
+// IN4     D7           13                   //
 ///////////////////////////////////////////////
