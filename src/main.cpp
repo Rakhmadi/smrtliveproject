@@ -51,12 +51,15 @@ void get_l(){
 void relay(){
       String condition =http_rest_server.arg("condition");
      if (condition == "on") {
+       Serial.print(condition);
        digitalWrite(led,0x000000000000);
      } else if (condition == "off") {
+        Serial.print(condition);
         digitalWrite(led,0x000000000001);
      } else {
           
      }
+       
        StaticJsonBuffer<200> jsonBuffer;
        JsonObject& jsonObj = jsonBuffer.createObject();
        char msbubb[200];
@@ -84,7 +87,9 @@ void qwer(){
        jsonObj["relay3"] =rt2;
        jsonObj["relay4"] =rt3;
        jsonObj["ssid"] =q;
-       jsonObj["pass"] =w;
+       //Show pass if you need it
+       
+       //jsonObj["pass"] =w;
        jsonObj.prettyPrintTo(msbubb, sizeof(msbubb));
        http_rest_server.sendHeader("Access-Control-Allow-Methods", "*");
        http_rest_server.sendHeader("Access-Control-Allow-Origin", "*");
@@ -201,3 +206,17 @@ void loop() {
 // IN3     D6           12                   //
 // IN4     D7           13                   //
 ///////////////////////////////////////////////
+//              ________    __________
+//             |       |___|         |
+//   reset >> _|            D1 mini  |
+//           |                       |
+//           |                       |
+//           |                       |
+//           |                       |
+//           |                       |
+//           |                       |
+//           |                       |
+//           |                       |
+//           |                       |
+//           |                       |
+//           |_______________________|
