@@ -7,13 +7,14 @@
 #include <ArduinoJson.h> //version 5.13.4 
 #include <DHT.h> 
 #include <Adafruit_Sensor.h>
-#include <stdio.h>
+
 /////////////DEFINE///////////////
 #define DRD_TIMEOUT 2.0
 #define DRD_ADDRESS 0x00
 #define PORT_REST_HTTP 80
 #define SYS_DHT_OUT_PIN 0
 #define SYS_DHT_TYPE DHT11
+
 //////////////////////////////////
 DHT dht;
 WiFiServer server(80);
@@ -23,6 +24,9 @@ byte led2 = 12;
 byte led3 = 13;
 byte ds   =  2;
 ESP8266WebServer http_rest_server(PORT_REST_HTTP);
+const byte DNS_PORT = 53; 
+DNSServer dnsServer;    
+
 //FUNCTION DHT11
 void get_l(){
     if (false)
@@ -32,19 +36,20 @@ void get_l(){
        //MENGAMBIL TEMPERATUR& HUMIDTY
        float tmp =dht.getTemperature();
        float hmdt=dht.getHumidity();
+       
        StaticJsonBuffer<200> jsonBuffer;
        JsonObject& jsonObj = jsonBuffer.createObject();
-       char JSONmessageBuffer[200];
+       char strs[200];
           jsonObj["id"] = 1;
-          jsonObj["temperatur"] =tmp;
-          jsonObj["kelembapan"] =hmdt;
-          jsonObj["signalstr"] = rsii;
+          jsonObj["temperatur"] =String(tmp);
+          jsonObj["kelembapan"] =String(hmdt);
+          jsonObj["signalstr"] = String(rsii);
           jsonObj["status"] = 200;
-          jsonObj.prettyPrintTo(JSONmessageBuffer, sizeof(JSONmessageBuffer));
+          jsonObj.prettyPrintTo(strs, sizeof(strs));
        http_rest_server.sendHeader("Access-Control-Allow-Methods", "*");
        http_rest_server.sendHeader("Access-Control-Allow-Origin", "*");
        http_rest_server.sendHeader("Access-Control-Allow-Headers", "*");
-       http_rest_server.send(200, "application/json",JSONmessageBuffer );
+       http_rest_server.send(200, "application/json",strs );
     }
 }
 //FUNCTION RELAY
@@ -166,18 +171,18 @@ void  sys_route_http(){
 void setup() {
        ////////////////////Setup Wifimanager
        WiFiManager wifimanager;
- 
        wifimanager.autoConnect("IoT_Dinamika","qwerty123");
        pinMode(led, OUTPUT);
        pinMode(led1, OUTPUT);
        pinMode(led2, OUTPUT);
        pinMode(led3, OUTPUT); //relay mode output
+       //dns setup
        ///// Button reset setup
        DoubleResetDetect drd(DRD_TIMEOUT, DRD_ADDRESS);
    if (drd.detect()) 
     {
         WiFi.disconnect();// Disconect wifi goto back to wifi configuration WiFimanager
-        Serial.print("");
+      
     }else{
       /////////// kosongkan saja
     }
